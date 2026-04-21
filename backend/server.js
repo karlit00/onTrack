@@ -5,28 +5,59 @@ require('dotenv').config();
 
 const app = express();
 
-app.use(cors());
+/* ---------------------------
+   Middleware
+---------------------------- */
+app.use(cors({
+  origin: [
+    'http://localhost:5173', // local frontend
+    'https://your-frontend.vercel.app' // replace after Vercel deploy
+  ],
+  credentials: true
+}));
+
 app.use(express.json());
 
+/* ---------------------------
+   MongoDB Connection
+---------------------------- */
 mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.log(err));
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log(err));
 
-// Add health check endpoint (useful for later)
+/* ---------------------------
+   Routes
+---------------------------- */
+
+// Root route
+app.get('/', (req, res) => {
+  res.status(200).json({
+    message: 'Habit Tracker Backend API is running'
+  });
+});
+
+// Health check route
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
+// API routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/habits', require('./routes/habitRoutes'));
 
-// Import scheduled reset
+/* ---------------------------
+   Scheduled Reset
+---------------------------- */
 const setupScheduledReset = require('./utils/scheduledReset');
 
+/* ---------------------------
+   Start Server
+---------------------------- */
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  
-  // Start the scheduled reset AFTER server is running
+
+  // Start cron job after server starts
   setupScheduledReset();
 });
