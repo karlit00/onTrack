@@ -9,12 +9,7 @@ const app = express();
    Middleware
 ---------------------------- */
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://on-track-six.vercel.app",
-    "https://on-track-nam7rek4a-kode3.vercel.app"
-  ],
+  origin: true,
   credentials: true
 }));
 
